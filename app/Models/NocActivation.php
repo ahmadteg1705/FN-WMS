@@ -8,34 +8,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class NocActivation extends Model
 {
     public const STATUS_WAITING = 'Menunggu Aktivasi';
-
     public const STATUS_ACCEPTED = 'Diterima NOC';
-
     public const STATUS_PROCESSING = 'Proses Aktivasi';
-
+    public const STATUS_WAITING_ADMIN_VERIFICATION = 'Menunggu Verifikasi Admin';
     public const STATUS_SUCCESS = 'Aktivasi Berhasil';
-
     public const STATUS_FAILED = 'Aktivasi Gagal';
 
     protected $fillable = [
         'work_order_id',
         'handled_by',
         'status',
-
         'sn_modem',
         'router_name',
         'odp_name',
         'olt_interface',
         'onu_number',
-
         'pppoe_username',
         'pppoe_password',
         'package_name',
-
         'provisioning_script',
         'activation_result',
         'noc_notes',
-
         'accepted_at',
         'started_at',
         'activated_at',
@@ -46,7 +39,6 @@ class NocActivation extends Model
     {
         return [
             'onu_number' => 'integer',
-
             'accepted_at' => 'datetime',
             'started_at' => 'datetime',
             'activated_at' => 'datetime',
@@ -61,10 +53,7 @@ class NocActivation extends Model
 
     public function handler(): BelongsTo
     {
-        return $this->belongsTo(
-            User::class,
-            'handled_by'
-        );
+        return $this->belongsTo(User::class, 'handled_by');
     }
 
     public function isWaiting(): bool
@@ -84,13 +73,10 @@ class NocActivation extends Model
 
     public function isCompleted(): bool
     {
-        return in_array(
-            $this->status,
-            [
-                self::STATUS_SUCCESS,
-                self::STATUS_FAILED,
-            ],
-            true
-        );
+        return in_array($this->status, [
+            self::STATUS_WAITING_ADMIN_VERIFICATION,
+            self::STATUS_SUCCESS,
+            self::STATUS_FAILED,
+        ], true);
     }
 }

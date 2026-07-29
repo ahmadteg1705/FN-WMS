@@ -1,0 +1,21 @@
+Tambahkan blok berikut DI DALAM Route::middleware(['auth'])->group(function () { ... });
+Letakkan di luar grup permission:roles.view dan permission:work-orders.view.
+
+Route::middleware('permission:noc-activations.view')
+    ->prefix('activation')
+    ->group(function () {
+        Route::get('/', [NocActivationController::class, 'index'])
+            ->name('noc-activations.index');
+
+        Route::post('/{nocActivation}/accept', [NocActivationController::class, 'accept'])
+            ->middleware('permission:noc-activations.accept')
+            ->name('noc-activations.accept');
+
+        Route::get('/{nocActivation}/process', [NocActivationController::class, 'process'])
+            ->middleware('permission:noc-activations.process')
+            ->name('noc-activations.process');
+
+        Route::post('/{nocActivation}/complete', [NocActivationController::class, 'complete'])
+            ->middleware('permission:noc-activations.process')
+            ->name('noc-activations.complete');
+    });

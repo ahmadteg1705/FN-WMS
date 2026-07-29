@@ -16,12 +16,16 @@ class Customer extends Model
         'nomor_pelanggan',
         'odp',
         'sn_modem',
+        'nas',
+        'onu_number',
+        'pppoe_username',
+        'pppoe_password',
         'latitude',
         'longitude',
         'tanggal_registrasi',
         'status',
         'foto_ktp',
         'foto_rumah',
-        'catatan'
+        'catatan',
     ];
 }

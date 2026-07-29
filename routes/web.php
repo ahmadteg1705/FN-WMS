@@ -44,18 +44,53 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
+    Route::middleware('permission:noc-activations.view')
+    ->prefix('activation')
+    ->group(function () {
+        Route::get('/', [NocActivationController::class, 'index'])
+            ->name('noc-activations.index');
+
+        Route::post('/{nocActivation}/accept', [NocActivationController::class, 'accept'])
+            ->middleware('permission:noc-activations.accept')
+            ->name('noc-activations.accept');
+
+        Route::get('/{nocActivation}/process', [NocActivationController::class, 'process'])
+            ->middleware('permission:noc-activations.process')
+            ->name('noc-activations.process');
+
+        Route::post('/{nocActivation}/complete', [NocActivationController::class, 'complete'])
+            ->middleware('permission:noc-activations.process')
+            ->name('noc-activations.complete');
+    });
     Route::middleware('permission:roles.view')->group(function () {
+        Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])
+            ->name('roles.permissions');
 
-    Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])
-        ->name('roles.permissions');
+        Route::put('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
+            ->name('roles.permissions.update');
 
-    Route::put('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
-        ->name('roles.permissions.update');
+        Route::resource('roles', RoleController::class);
+    });
 
-    Route::resource('roles', RoleController::class);
-    Route::post('/registrations/{registration}/verify', [RegistrationController::class, 'verify']
-        )->name('registrations.verify');
-});
+    Route::post('/registrations/{registration}/verify', [RegistrationController::class, 'verify'])
+        ->name('registrations.verify');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Modul Aktivasi NOC
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('activation')
+        ->name('noc-activations.')
+        ->middleware('permission:noc-activations.view')
+        ->group(function () {
+            Route::get('/', [NocActivationController::class, 'index'])
+                ->name('index');
+
+            Route::post('/{nocActivation}/accept', [NocActivationController::class, 'accept'])
+                ->middleware('permission:noc-activations.accept')
+                ->name('accept');
+        });
     Route::middleware('permission:users.view')->group(function () {
 
     Route::resource('users', UserController::class)->except('show');
