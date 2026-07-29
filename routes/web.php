@@ -55,21 +55,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::post('/registrations/{registration}/verify', [RegistrationController::class, 'verify']
         )->name('registrations.verify');
-    Route::middleware([
-    'auth',
-    'role:super_user,superuser,super_admin,admin,noc',
-])->prefix('activation')->group(function () {
-    Route::get(
-        '/',
-        [NocActivationController::class, 'index']
-    )->name('noc-activations.index');
-
-    Route::post(
-        '/{nocActivation}/accept',
-        [NocActivationController::class, 'accept']
-    )->name('noc-activations.accept');
-});
-
 });
     Route::middleware('permission:users.view')->group(function () {
 
