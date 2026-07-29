@@ -300,6 +300,28 @@
 
         </a>
         @endcan
+        @can('noc-activations.process')
+        <a href="{{ route('noc-activations.index', ['status' => \App\Models\NocActivation::STATUS_PROCESSING]) }}"
+            class="flex items-center gap-3 py-2 {{ request('status') === \App\Models\NocActivation::STATUS_PROCESSING || request()->routeIs('noc-activations.process') ? 'text-white font-semibold' : 'text-blue-200 hover:text-white transition' }}">
+            <span class="w-1.5 h-1.5 rounded-full {{ request('status') === \App\Models\NocActivation::STATUS_PROCESSING || request()->routeIs('noc-activations.process') ? 'bg-violet-300' : 'bg-blue-400/50' }}"></span>
+
+            Proses Aktivasi
+
+            @php
+                $processingActivation = \App\Models\NocActivation::whereIn('status', [
+                    \App\Models\NocActivation::STATUS_ACCEPTED,
+                    \App\Models\NocActivation::STATUS_PROCESSING,
+                ])->count();
+            @endphp
+
+            @if($processingActivation > 0)
+                <span class="ml-auto inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-violet-500 px-2 text-xs font-bold text-white">
+                    {{ $processingActivation }}
+                </span>
+            @endif
+        </a>
+        @endcan
+
 
         @can('schedules.view')
         <a href="#"

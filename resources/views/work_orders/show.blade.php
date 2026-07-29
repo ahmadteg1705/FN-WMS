@@ -157,42 +157,54 @@
                 </div>
                 <hr class="my-4">
 
-@role('Super Admin|Admin|NOC')
-<div>
-    <h3 class="font-semibold text-slate-800 mb-3">
-        Akun PPPoE
-    </h3>
-    @if($workOrder->account)
-        <div class="flex justify-between mb-2">
-            <span class="text-slate-500">
-                Username
-            </span>
-            <span class="font-medium">
-                {{ $workOrder->account->username }}
-            </span>
+@role('Super User|Super Admin|Admin|NOC')
+<div class="rounded-lg border border-blue-100 bg-blue-50/60 p-4">
+    <div class="mb-3 flex items-center justify-between gap-3">
+        <div>
+            <h3 class="font-semibold text-slate-800">Akun PPPoE</h3>
+            <p class="mt-1 text-xs text-slate-500">
+                Username dan password ini digunakan pada proses Aktivasi NOC.
+            </p>
         </div>
-        <div class="flex justify-between items-center">
-            <span class="text-slate-500">
-                Password
-            </span>
-            <div class="text-right">
-                <span
-                    id="passwordText"
-                    class="font-medium">
-                    ••••••••••
+
+        @role('Super User|Super Admin|Admin')
+        <button
+            type="button"
+            onclick="openPPPoEModal()"
+            class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
+            {{ $workOrder->account ? '✏️ Edit Akun' : '➕ Tambah Akun' }}
+        </button>
+        @endrole
+    </div>
+
+    @if($workOrder->account)
+        <div class="space-y-3 rounded-lg border border-blue-100 bg-white p-3">
+            <div class="flex items-start justify-between gap-4">
+                <span class="text-slate-500">Username</span>
+                <span class="break-all text-right font-mono font-semibold text-slate-900">
+                    {{ $workOrder->account->username }}
                 </span>
-                <br>
-                <button
-                    type="button"
-                    onclick="togglePassword()"
-                    class="text-blue-600 text-xs hover:underline">
-                    👁 Tampilkan Password
-                </button>
+            </div>
+
+            <div class="flex items-start justify-between gap-4">
+                <span class="text-slate-500">Password</span>
+                <div class="text-right">
+                    <span id="passwordText" class="break-all font-mono font-semibold text-slate-900">
+                        ••••••••••
+                    </span>
+                    <br>
+                    <button
+                        type="button"
+                        onclick="togglePassword()"
+                        class="mt-1 text-xs font-semibold text-blue-600 hover:underline">
+                        👁 Tampilkan / Sembunyikan
+                    </button>
+                </div>
             </div>
         </div>
     @else
-        <div class="text-slate-500 italic">
-            Belum dibuat.
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            Akun PPPoE belum dibuat. Admin wajib melengkapinya sebelum Aktivasi NOC.
         </div>
     @endif
 </div>
@@ -541,7 +553,11 @@
 
 </div>
 <script>
-
+document.addEventListener('DOMContentLoaded', function () {
+    @if($errors->any() && (old('username') !== null || old('work_order_id') !== null))
+        openPPPoEModal();
+    @endif
+});
 function openPPPoEModal(){
     document.getElementById('pppoeModal').classList.remove('hidden');
     document.getElementById('pppoeModal').classList.add('flex');

@@ -133,6 +133,15 @@ class NocActivationController extends Controller
             $nocActivation->refresh();
         }
 
+                abort_unless(
+            $nocActivation->workOrder?->account
+                && filled($nocActivation->workOrder->account->username)
+                && filled($nocActivation->workOrder->account->password),
+            422,
+            'Akun PPPoE belum diisi oleh Admin. Silakan minta Admin melengkapi username dan password pada Detail Work Order.'
+        );
+
+
         $registration = $nocActivation->workOrder?->registration;
         $odp = $registration?->odp;
         $router = $this->resolveRouter($odp?->router);
