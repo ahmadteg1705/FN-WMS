@@ -49,6 +49,9 @@ Route::middleware(['auth'])->group(function () {
     ->group(function () {
         Route::get('/', [NocActivationController::class, 'index'])
             ->name('noc-activations.index');
+        Route::get('/process', [NocActivationController::class, 'processingIndex'])
+            ->middleware('permission:noc-activations.process')
+            ->name('noc-activations.processing');
 
         Route::post('/{nocActivation}/accept', [NocActivationController::class, 'accept'])
             ->middleware('permission:noc-activations.accept')
@@ -61,6 +64,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{nocActivation}/complete', [NocActivationController::class, 'complete'])
             ->middleware('permission:noc-activations.process')
             ->name('noc-activations.complete');
+        Route::post('/{nocActivation}/verify-admin', [NocActivationController::class, 'verifyAdmin'])
+            ->middleware('permission:noc-activations.verify')
+            ->name('noc-activations.verify-admin');
     });
     Route::middleware('permission:roles.view')->group(function () {
         Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])

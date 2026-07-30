@@ -2,122 +2,97 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Proses Aktivasi NOC</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800">
-<header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-950 text-white shadow-lg">
-    <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
-        <a href="{{ route('noc-activations.index') }}" class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-xl hover:bg-white/20">←</a>
-        <div class="min-w-0 flex-1">
-            <h1 class="truncate text-base font-bold sm:text-lg">Proses Aktivasi NOC</h1>
-            <p class="truncate text-xs text-slate-400">WO {{ $nocActivation->workOrder?->work_order_no ?? '#'.$nocActivation->work_order_id }}</p>
+<header class="bg-slate-950 text-white">
+    <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4">
+        <a href="{{ route('noc-activations.processing') }}" class="rounded-lg bg-white/10 px-4 py-3">←</a>
+        <div>
+            <h1 class="font-bold">Proses Aktivasi NOC</h1>
+            <p class="text-xs text-slate-400">Seluruh parameter OLT berasal dari Router NAS dan Master ODP</p>
         </div>
-        <span class="rounded-full bg-violet-400/15 px-3 py-1 text-xs font-semibold text-violet-300">{{ $nocActivation->status }}</span>
     </div>
 </header>
 
-<main class="mx-auto max-w-7xl px-4 py-5 sm:px-6">
-    @if(session('success'))
-        <div class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{{ session('success') }}</div>
-    @endif
-
+<main class="mx-auto max-w-7xl px-4 py-5">
     @if($errors->any())
-        <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            <p class="font-bold">Data belum dapat disimpan:</p>
-            <ul class="mt-2 list-disc space-y-1 pl-5">
-                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
-            </ul>
+        <div class="mb-4 rounded-xl bg-red-50 p-4 text-red-800">
+            @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
         </div>
     @endif
 
-    <form id="activation-form" action="{{ route('noc-activations.complete', $nocActivation) }}" method="POST">
+    <form id="activation-form" method="POST" action="{{ route('noc-activations.complete', $nocActivation) }}">
         @csrf
 
-        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <section class="grid gap-3 md:grid-cols-3">
             @foreach([
-                ['NAS', $data['nas']],
-                ['Nama Pelanggan', $data['customer_name']],
+                ['Router NAS', $data['nas']],
+                ['Pelanggan', $data['customer_name']],
                 ['SN', $data['sn']],
-                ['ODP', $data['odp']],
+                ['Master ODP', $data['odp']],
+                ['Card OLT', $data['card']],
+                ['Range ONU', $data['onu_start'].' - '.$data['onu_end']],
                 ['Username', $data['username']],
                 ['Password', $data['password']],
+                ['ONU Type', $data['onu_type']],
+                ['VLAN', $data['vlan']],
+                ['VLAN Profile', $data['vlan_profile']],
+                ['TCONT Profile', $data['tcont_profile']],
             ] as [$label, $value])
-                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $label }}</p>
-                    <p class="mt-2 break-all font-mono text-sm font-bold text-slate-900">{{ $value }}</p>
+                <div class="rounded-xl bg-white p-4 shadow">
+                    <p class="text-xs font-bold text-slate-400">{{ $label }}</p>
+                    <p class="mt-1 break-all font-mono font-bold">{{ $value }}</p>
                 </div>
             @endforeach
         </section>
 
-        <section class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="grid gap-4 md:grid-cols-[1fr_auto_auto] md:items-end">
-                <div>
-                    <label for="onu_number" class="mb-2 block text-sm font-bold text-slate-700">Nomor ONU <span class="text-red-600">*</span></label>
-                    <input
-                        id="onu_number"
-                        name="onu_number"
-                        type="number"
-                        min="1"
-                        max="128"
-                        value="{{ old('onu_number', $nocActivation->onu_number) }}"
-                        placeholder="Contoh: 25"
-                        required
-                        class="h-12 w-full rounded-xl border-slate-300 px-4 font-mono text-sm focus:border-cyan-500 focus:ring-cyan-500"
-                    >
-                </div>
-                <button id="btn-check" type="button" class="h-12 rounded-xl bg-amber-500 px-5 text-sm font-bold text-white hover:bg-amber-600">Cek ONU Kosong</button>
-                <button id="btn-generate" type="button" class="h-12 rounded-xl bg-cyan-600 px-5 text-sm font-bold text-white hover:bg-cyan-700">Generate</button>
+        <section class="mt-5 rounded-xl bg-white p-5 shadow">
+            <label class="mb-2 block font-bold">Nomor ONU</label>
+            <div class="grid gap-3 md:grid-cols-[1fr_auto_auto]">
+                <input id="onu_number" name="onu_number" type="number"
+                       min="{{ $data['onu_start'] }}" max="{{ $data['onu_end'] }}"
+                       value="{{ old('onu_number', $nocActivation->onu_number) }}"
+                       class="h-12 rounded-lg border-slate-300" required>
+                <button id="btn-check" type="button" class="rounded-lg bg-amber-500 px-5 font-bold text-white">
+                    Cek ONU
+                </button>
+                <button id="btn-generate" type="button" class="rounded-lg bg-cyan-600 px-5 font-bold text-white">
+                    Generate
+                </button>
             </div>
+            <p class="mt-2 text-xs text-slate-500">
+                Range diambil dari Master ODP: {{ $data['onu_start'] }} sampai {{ $data['onu_end'] }}.
+            </p>
         </section>
 
         <input type="hidden" name="odp_name" value="{{ $data['odp'] }}">
         <textarea id="provisioning_script" name="provisioning_script" class="hidden">{{ old('provisioning_script', $nocActivation->provisioning_script) }}</textarea>
 
         <section class="mt-5 grid gap-5 xl:grid-cols-2">
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <h2 class="font-bold text-slate-900">Frame Cek ONU Kosong</h2>
-                        <p class="mt-1 text-xs text-slate-500">Salin dan jalankan pada OLT.</p>
+            @foreach([
+                ['check-frame', 'Cek ONU Kosong'],
+                ['frame-1', 'Frame 1 — Registrasi SN'],
+                ['frame-2', 'Frame 2 — Konfigurasi Layanan'],
+            ] as [$id, $title])
+                <div class="rounded-xl bg-white p-5 shadow {{ $id === 'frame-2' ? 'xl:col-span-2' : '' }}">
+                    <div class="flex justify-between">
+                        <h2 class="font-bold">{{ $title }}</h2>
+                        <button type="button" data-copy="{{ $id }}" class="rounded bg-slate-100 px-3 py-2 text-xs font-bold">Copy</button>
                     </div>
-                    <button type="button" data-copy="check-frame" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200">Copy</button>
+                    <pre id="{{ $id }}" class="mt-4 min-h-40 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 font-mono text-sm text-emerald-300">Klik tombol di atas.</pre>
                 </div>
-                <pre id="check-frame" class="mt-4 min-h-32 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 font-mono text-sm text-emerald-300">Klik “Cek ONU Kosong”.</pre>
-            </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <h2 class="font-bold text-slate-900">Frame 1 — Registrasi SN</h2>
-                        <p class="mt-1 text-xs text-slate-500">Perintah registrasi ONU.</p>
-                    </div>
-                    <button type="button" data-copy="frame-1" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200">Copy</button>
-                </div>
-                <pre id="frame-1" class="mt-4 min-h-48 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 font-mono text-sm text-cyan-300">Klik “Generate”.</pre>
-            </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
-                <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <h2 class="font-bold text-slate-900">Frame 2 — Konfigurasi Layanan</h2>
-                        <p class="mt-1 text-xs text-slate-500">Konfigurasi PPPoE, VLAN, dan manajemen ONU.</p>
-                    </div>
-                    <button type="button" data-copy="frame-2" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200">Copy</button>
-                </div>
-                <pre id="frame-2" class="mt-4 min-h-64 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 font-mono text-sm text-violet-300">Klik “Generate”.</pre>
-            </div>
+            @endforeach
         </section>
 
-        <section class="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <label for="noc_notes" class="mb-2 block text-sm font-bold text-slate-700">Catatan NOC</label>
-            <textarea id="noc_notes" name="noc_notes" rows="3" class="w-full rounded-xl border-slate-300 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-cyan-500" placeholder="Opsional">{{ old('noc_notes', $nocActivation->noc_notes) }}</textarea>
-
-            <div class="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <a href="{{ route('noc-activations.index') }}" class="flex h-12 items-center justify-center rounded-xl border border-slate-300 px-6 text-sm font-bold text-slate-700 hover:bg-slate-50">Kembali</a>
-                <button type="submit" class="h-12 rounded-xl bg-emerald-600 px-7 text-sm font-bold text-white hover:bg-emerald-700" onclick="return confirm('Pastikan aktivasi sudah berhasil. Simpan dan kirim ke verifikasi Admin?')">
+        <section class="mt-5 rounded-xl bg-white p-5 shadow">
+            <label class="mb-2 block font-bold">Catatan NOC</label>
+            <textarea name="noc_notes" rows="3" class="w-full rounded-lg border-slate-300">{{ old('noc_notes', $nocActivation->noc_notes) }}</textarea>
+            <div class="mt-4 flex justify-end">
+                <button class="h-12 rounded-lg bg-emerald-600 px-7 font-bold text-white"
+                        onclick="return confirm('Aktivasi sudah berhasil dan siap diverifikasi Admin?')">
                     Simpan / Aktivasi Selesai
                 </button>
             </div>
@@ -134,85 +109,88 @@
     const frame2 = document.getElementById('frame-2');
     const scriptInput = document.getElementById('provisioning_script');
 
-    const sanitizeName = (value) => String(value || '')
+    const onuNumber = () => {
+        const value = Number(onuInput.value);
+        const start = Number(data.onu_start);
+        const end = Number(data.onu_end);
+
+        if (!Number.isInteger(value) || value < start || value > end) {
+            alert(`Nomor ONU harus berada pada range Master ODP: ${start} - ${end}.`);
+            return null;
+        }
+
+        return value;
+    };
+
+    const cleanName = value => String(value || '')
         .trim()
         .replace(/\s+/g, '-')
         .replace(/[^a-zA-Z0-9._-]/g, '');
 
-    const validateOnu = () => {
-        const onu = Number(onuInput.value);
-        if (!Number.isInteger(onu) || onu < 1 || onu > 128) {
-            alert('Nomor ONU harus berupa angka 1 sampai 128.');
-            onuInput.focus();
-            return null;
-        }
-        return onu;
-    };
-
     document.getElementById('btn-check').addEventListener('click', () => {
-        const onu = validateOnu();
-        if (!onu) return;
-        checkFrame.textContent = `show gpon onu state gpon-olt_${data.card}\nshow gpon onu state gpon-olt_${data.card} | include ${onu}`;
+        if (!onuNumber()) return;
+        checkFrame.textContent = `show gpon onu state gpon-olt_${data.card}`;
     });
 
     document.getElementById('btn-generate').addEventListener('click', () => {
-        const onu = validateOnu();
+        const onu = onuNumber();
         if (!onu) return;
 
-        const customer = sanitizeName(data.customer_name) || `PELANGGAN-${onu}`;
+        if (!confirm('Apakah data Router NAS, Master ODP, SN dan PPPoE sudah benar?')) return;
+
+        const customer = cleanName(data.customer_name) || `PELANGGAN-${onu}`;
         const olt = `gpon-olt_${data.card}`;
         const onuInterface = `gpon-onu_${data.card}:${onu}`;
+
+        const serviceCommand = String(data.service_command)
+            .replaceAll('{vlan}', data.vlan)
+            .replaceAll('{gemport}', '1')
+            .replaceAll('{service}', '1');
 
         const first = [
             'conf t',
             `interface ${olt}`,
-            `onu ${onu} type ${data.onu_type || 'ALL-ONT'} sn ${data.sn}`,
+            `onu ${onu} type ${data.onu_type} sn ${data.sn}`,
+            '!',
             'end'
         ].join('\n');
 
-        const secondLines = [
+        const second = [
             'conf t',
             `interface ${onuInterface}`,
             `name ${customer}`,
-            `tcont 1 profile ${data.tcont_profile || 'server'}`,
-            'gemport 1 tcont 1',
-            data.vlan ? `service-port 1 vport 1 user-vlan ${data.vlan} vlan ${data.vlan}` : '',
-            'exit',
+            `  tcont 1 profile ${data.tcont_profile}`,
+            '  gemport 1 tcont 1',
+            `  service-port 1 vport 1 user-vlan ${data.vlan} vlan ${data.vlan}`,
+            '!',
+            '!',
             `pon-onu-mng ${onuInterface}`,
-            data.vlan_profile
-                ? `wan-ip 1 mode pppoe username ${data.username} password ${data.password} vlan-profile ${data.vlan_profile} host 1`
-                : `wan-ip 1 mode pppoe username ${data.username} password ${data.password} host 1`,
-            data.security_mgmt ? `security-mgmt ${data.security_mgmt} state enable mode forward protocol web` : '',
+            `  ${serviceCommand}`,
+            `  wan-ip 1 mode pppoe username ${data.username} password ${data.password} vlan-profile ${data.vlan_profile} host 1`,
+            `  security-mgmt ${data.security_mgmt} state enable mode forward protocol web`,
+            `  wan 1 ethuni ${data.wan_ethuni} ssid ${data.wan_ssid} service ${data.wan_service} host 1`,
+            '!',
+            '!',
             'end'
-        ].filter(Boolean);
+        ].join('\n');
 
         frame1.textContent = first;
-        frame2.textContent = secondLines.join('\n');
-        scriptInput.value = `### FRAME 1 ###\n${first}\n\n### FRAME 2 ###\n${secondLines.join('\n')}`;
+        frame2.textContent = second;
+        scriptInput.value = `### FRAME 1 ###\n${first}\n\n### FRAME 2 ###\n${second}`;
     });
 
-    document.querySelectorAll('[data-copy]').forEach((button) => {
+    document.querySelectorAll('[data-copy]').forEach(button => {
         button.addEventListener('click', async () => {
-            const target = document.getElementById(button.dataset.copy);
-            try {
-                await navigator.clipboard.writeText(target.textContent);
-                const oldText = button.textContent;
-                button.textContent = 'Tersalin';
-                setTimeout(() => button.textContent = oldText, 1200);
-            } catch {
-                alert('Gagal menyalin. Silakan blok teks dan salin manual.');
-            }
+            await navigator.clipboard.writeText(
+                document.getElementById(button.dataset.copy).textContent
+            );
         });
     });
 
-    document.getElementById('activation-form').addEventListener('submit', (event) => {
-        if (!validateOnu()) {
+    document.getElementById('activation-form').addEventListener('submit', event => {
+        if (!onuNumber() || !scriptInput.value.trim()) {
             event.preventDefault();
-            return;
-        }
-        if (!scriptInput.value.trim()) {
-            event.preventDefault();
-            alert('Klik Generate terlebih dahulu sebelum menyimpan.');
+            alert('Validasi ONU dan klik Generate terlebih dahulu.');
         }
     });
 })();

@@ -278,9 +278,9 @@
         {{-- AKTIVASI NOC --}}
         @can('noc-activations.view')
         <a href="{{ route('noc-activations.index') }}"
-            class="flex items-center gap-3 py-2 {{ request()->routeIs('noc-activations.*') ? 'text-white font-semibold' : 'text-blue-200 hover:text-white transition' }}">
+            class="flex items-center gap-3 py-2 {{ request()->routeIs('noc-activations.index') ? 'text-white font-semibold' : 'text-blue-200 hover:text-white transition' }}">
 
-            <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('noc-activations.*') ? 'bg-white' : 'bg-blue-400/50' }}"></span>
+            <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('noc-activations.index') ? 'bg-white' : 'bg-blue-400/50' }}"></span>
 
             Aktivasi NOC
 
@@ -301,9 +301,9 @@
         </a>
         @endcan
         @can('noc-activations.process')
-        <a href="{{ route('noc-activations.index', ['status' => \App\Models\NocActivation::STATUS_PROCESSING]) }}"
-            class="flex items-center gap-3 py-2 {{ request('status') === \App\Models\NocActivation::STATUS_PROCESSING || request()->routeIs('noc-activations.process') ? 'text-white font-semibold' : 'text-blue-200 hover:text-white transition' }}">
-            <span class="w-1.5 h-1.5 rounded-full {{ request('status') === \App\Models\NocActivation::STATUS_PROCESSING || request()->routeIs('noc-activations.process') ? 'bg-violet-300' : 'bg-blue-400/50' }}"></span>
+        <a href="{{ route('noc-activations.processing') }}"
+            class="flex items-center gap-3 py-2 {{ request()->routeIs('noc-activations.processing') || request()->routeIs('noc-activations.process') ? 'text-white font-semibold' : 'text-blue-200 hover:text-white transition' }}">
+            <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('noc-activations.processing') || request()->routeIs('noc-activations.process') ? 'bg-violet-300' : 'bg-blue-400/50' }}"></span>
 
             Proses Aktivasi
 

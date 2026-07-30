@@ -165,6 +165,8 @@
                 @enderror
             </div>
 
+            @include('routers._olt_generator_fields')
+
             {{-- Status --}}
             <div>
                 <label class="block mb-2 font-semibold text-gray-700">
