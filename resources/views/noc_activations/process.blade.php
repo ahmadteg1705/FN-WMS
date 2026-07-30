@@ -1,4 +1,6 @@
-<x-app-layout>
+@extends('layouts.admin')
+
+@section('content')
 <div class="space-y-5">
     @if($errors->any())
         <div class="mb-4 rounded-xl bg-red-50 p-4 text-red-800">
@@ -177,4 +179,4 @@
     });
 })();
 </script>
-</x-app-layout>
+@endsection

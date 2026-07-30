@@ -1,4 +1,6 @@
-<x-app-layout>
+@extends('layouts.admin')
+
+@section('content')
 <div class="space-y-5">
     @if(session('success'))
         <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
@@ -100,4 +102,4 @@
         @endif
     </section>
 </div>
-</x-app-layout>
+@endsection
