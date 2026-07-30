@@ -1,23 +1,5 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Proses Aktivasi NOC</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-slate-100 text-slate-800">
-<header class="bg-slate-950 text-white">
-    <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4">
-        <a href="{{ route('noc-activations.processing') }}" class="rounded-lg bg-white/10 px-4 py-3">←</a>
-        <div>
-            <h1 class="font-bold">Proses Aktivasi NOC</h1>
-            <p class="text-xs text-slate-400">Seluruh parameter OLT berasal dari Router NAS dan Master ODP</p>
-        </div>
-    </div>
-</header>
-
-<main class="mx-auto max-w-7xl px-4 py-5">
+<x-app-layout>
+<div class="space-y-5">
     @if($errors->any())
         <div class="mb-4 rounded-xl bg-red-50 p-4 text-red-800">
             @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
@@ -195,5 +177,4 @@
     });
 })();
 </script>
-</body>
-</html>
+</x-app-layout>
