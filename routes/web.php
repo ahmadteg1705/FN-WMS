@@ -26,14 +26,6 @@ Route::put('/registrations/{registration}/status', [RegistrationController::clas
     ->name('registrations.status.update');
 Route::get('/registrations/odp/{odp}/info', [RegistrationController::class, 'odpInfo'])
     ->name('registrations.odp.info');
-Route::get('/reports/registrations/excel', [ReportController::class, 'registrationExcel'])
-    ->name('reports.registrations.excel');
-
-Route::get('/odps/export', [OdpController::class, 'export'])
-    ->name('odps.export');
-    
-Route::get('/odps/template', [OdpController::class, 'downloadTemplate'])
-    ->name('odps.template');
 
 Route::get('/', function () {
     return view('welcome');
@@ -159,7 +151,14 @@ Route::post(
     });
     
     Route::resource('marketings', MarketingController::class);
-    Route::resource('registrations', RegistrationController::class);
+    Route::get('/registrations', [RegistrationController::class, 'index'])->middleware('permission:registrations.view')->name('registrations.index');
+    Route::get('/registrations/create', [RegistrationController::class, 'create'])->middleware('permission:registrations.create')->name('registrations.create');
+    Route::post('/registrations', [RegistrationController::class, 'store'])->middleware('permission:registrations.create')->name('registrations.store');
+    Route::get('/registrations/{registration}', [RegistrationController::class, 'show'])->middleware('permission:registrations.show')->name('registrations.show');
+    Route::get('/registrations/{registration}/edit', [RegistrationController::class, 'edit'])->middleware('permission:registrations.edit')->name('registrations.edit');
+    Route::match(['put','patch'], '/registrations/{registration}', [RegistrationController::class, 'update'])->middleware('permission:registrations.edit')->name('registrations.update');
+    Route::delete('/registrations/{registration}', [RegistrationController::class, 'destroy'])->middleware('permission:registrations.delete')->name('registrations.destroy');
+    Route::get('/reports/registrations/excel', [ReportController::class, 'registrationExcel'])->middleware('permission:registrations.export')->name('reports.registrations.excel');
     Route::resource('teams', TeamController::class);
     Route::post('/technicians/import', [TechnicianController::class, 'import'])
     ->name('technicians.import');
@@ -170,7 +169,29 @@ Route::post(
     Route::resource('positions', PositionController::class);
     Route::resource('technicians', TechnicianController::class);
     Route::resource('routers', RouterController::class);
-    Route::resource('odps', OdpController::class);
+    Route::get('/odps', [OdpController::class, 'index'])
+        ->middleware('permission:odps.view')->name('odps.index');
+    Route::get('/odps/{odp}', [OdpController::class, 'show'])
+        ->middleware('permission:odps.view')->name('odps.show');
+
+    Route::get('/odps/create', [OdpController::class, 'create'])
+        ->middleware('permission:odps.create')->name('odps.create');
+    Route::post('/odps', [OdpController::class, 'store'])
+        ->middleware('permission:odps.create')->name('odps.store');
+
+    Route::get('/odps/{odp}/edit', [OdpController::class, 'edit'])
+        ->middleware('permission:odps.edit')->name('odps.edit');
+    Route::put('/odps/{odp}', [OdpController::class, 'update'])
+        ->middleware('permission:odps.edit')->name('odps.update');
+    Route::patch('/odps/{odp}', [OdpController::class, 'update'])
+        ->middleware('permission:odps.edit');
+
+    Route::delete('/odps/{odp}', [OdpController::class, 'destroy'])
+        ->middleware('permission:odps.delete')->name('odps.destroy');
+
+    Route::post('/odps/import', [OdpController::class, 'import'])
+        ->middleware('permission:odps.import')->name('odps.import');
+
     Route::post('/packages/import', [PackageController::class, 'import'])
     ->name('packages.import');
     Route::resource('packages', PackageController::class);
@@ -186,10 +207,6 @@ Route::post(
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/odps/import', [OdpController::class, 'import'])
-    ->name('odps.import');
-    Route::get('/odps/template', [OdpController::class, 'downloadTemplate'])
-        ->name('odps.template');
 });
 
 require __DIR__.'/auth.php';

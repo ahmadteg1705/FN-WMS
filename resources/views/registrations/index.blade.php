@@ -27,18 +27,22 @@
     </div>
 
     <div class="flex items-center gap-3">
+        @can('registrations.create')
         <a href="{{ route('registrations.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
             Registrasi Baru
         </a>
+        @endcan
+        @can('registrations.export')
         <a href="{{ route('reports.registrations.excel', request()->query()) }}"
    class="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
 
     Export Excel
 
 </a>
+        @endcan
     </div>
 </div>
 {{-- Filter & Search Section --}}
@@ -215,6 +219,7 @@
                     </td>
                     <td class="px-6 py-4 text-center whitespace-nowrap">
                         <div class="flex items-center justify-center gap-2">
+                            @can('registrations.show')
                             <a href="{{ route('registrations.show', $registration) }}"
                             class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-100 hover:text-emerald-700">
 
@@ -230,6 +235,8 @@
                                 </svg>
                                 Lihat
                             </a>
+                            @endcan
+                            @can('registrations.edit')
                             <a href="{{ route('registrations.edit', $registration) }}" 
                                class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 transition hover:bg-blue-100 hover:text-blue-700">
                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,6 +244,9 @@
                                 </svg>
                                 Edit
                             </a>
+                            @endcan
+
+                            @can('registrations.delete')
 
                             <form action="{{ route('registrations.destroy', $registration) }}" method="POST" class="inline">
                                 @csrf
@@ -250,6 +260,8 @@
                                     Hapus
                                 </button>
                             </form>
+
+                            @endcan
                         </div>
                     </td>
                 </tr>
