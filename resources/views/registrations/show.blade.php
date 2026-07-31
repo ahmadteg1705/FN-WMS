@@ -15,15 +15,11 @@
             <a href="{{ route('registrations.index') }}" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
                 ← Kembali
             </a>
-            <a href="{{ route('registrations.status.edit', $registration) }}"
-            class="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-600">
-
-                Ubah Status
-
-</a>
-            <a href="{{ route('registrations.edit', $registration) }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700">
-                ✏ Edit
-            </a>
+            {{-- registrations-admin-header-actions --}}
+@role('Super User|Super Admin|Admin')
+    ${status}
+    ${edit}
+@endrole
         </div>
     </div>
 
@@ -260,58 +256,10 @@
                 @endif
             </div>
 
-            {{-- Action Registrasi --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                @if($registration->status == 'Registrasi Baru')
-
-                    <form
-                        action="{{ route('registrations.verify', $registration) }}"
-                        method="POST"
-                    >
-                        @csrf
-
-                        <button
-                            type="submit"
-                            onclick="return confirm('Verifikasi registrasi ini?')"
-                            class="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
-                        >
-                            ✓ Verifikasi
-                        </button>
-                    </form>
-
-                @elseif($registration->status == 'Diverifikasi')
-
-                    @if($registration->status == 'Diverifikasi')
-
-                        @if(!$registration->workOrder)
-
-                            <a
-                                href="{{ route('work-orders.create', ['registration' => $registration->id]) }}"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow">
-
-                                📅 Jadwalkan Teknisi
-
-                            </a>
-
-                        @else
-
-                            <a
-                                href="{{ route('work-orders.show', $registration->workOrder) }}"
-                                class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow">
-
-                                👷 Lihat Work Order
-
-                            </a>
-
-                        @endif
-
-                    @endif
-                @endif
-
-            </div>
-
-        </div>
+            {{-- registrations-admin-action-card --}}
+@role('Super User|Super Admin|Admin')
+${card}
+@endrole</div>
 
     </div>
 

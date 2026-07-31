@@ -205,6 +205,7 @@ if ($request->hasFile('foto_ktp')) {
      */
     public function edit(Registration $registration)
 {
+        $this->ensureAdminOnly();
     $packages = Package::where('status',1)
         ->orderBy('nama')
         ->get();
@@ -230,6 +231,7 @@ $marketings = Marketing::with('user')
      */
     public function update(Request $request, Registration $registration)
 {
+        $this->ensureAdminOnly();
     $request->validate([
         'nama'       => 'required|max:255',
         'telepon'    => 'required|max:20',
@@ -283,6 +285,7 @@ $marketings = Marketing::with('user')
      */
     public function destroy(Registration $registration)
 {
+        $this->ensureAdminOnly();
     if (
         $registration->foto_ktp &&
         Storage::disk('public')->exists($registration->foto_ktp)
@@ -341,6 +344,7 @@ return response()->json([
 }
 public function editStatus(Registration $registration)
 {
+        $this->ensureAdminOnly();
     $statuses = [
         'Registrasi Baru',
         'Diverifikasi',
@@ -359,6 +363,7 @@ public function editStatus(Registration $registration)
 
 public function updateStatus(Request $request, Registration $registration)
 {
+        $this->ensureAdminOnly();
     $request->validate([
         'status' => 'required',
         'catatan' => 'nullable|string',
@@ -384,6 +389,7 @@ public function updateStatus(Request $request, Registration $registration)
 }
 public function verify(Registration $registration)
 {
+        $this->ensureAdminOnly();
     if ($registration->status !== 'Registrasi Baru') {
         return back()->with(
             'error',
@@ -412,4 +418,18 @@ public function verify(Registration $registration)
             'Registrasi berhasil diverifikasi.'
         );
 }
+
+    private function ensureAdminOnly(): void
+    {
+        abort_unless(
+            auth()->check()
+                && auth()->user()->hasAnyRole([
+                    'Super User',
+                    'Super Admin',
+                    'Admin',
+                ]),
+            403,
+            'Hanya Admin yang dapat mengubah data atau status Registrasi.'
+        );
+    }
 }
