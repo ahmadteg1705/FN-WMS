@@ -100,7 +100,7 @@ if ($user->hasRole('Marketing')) {
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
 {
     $packages = Package::where('status',1)
         ->orderBy('nama')
@@ -108,9 +108,7 @@ if ($user->hasRole('Marketing')) {
 
     $odps = Odp::orderBy('nama')
         ->get();
-$marketings = Marketing::with('user')
-    ->get()
-    ->sortBy(fn ($marketing) => $marketing->user->name ?? '');
+$marketings = $this->marketingUsersForForm($request);
     return view(
         'registrations.create',
         compact('packages','odps','marketings')
@@ -130,6 +128,10 @@ $marketings = Marketing::with('user')
         'package_id' => 'required',
         'odp_id'     => 'required',
     ]);
+
+        $request->merge([
+            'marketing_id' => $this->resolveMarketingId($request),
+        ]);
 
     $nomor =
         'REG-'
@@ -203,7 +205,7 @@ if ($request->hasFile('foto_ktp')) {
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Registration $registration)
+    public function edit(Request $request, Registration $registration)
 {
         $this->ensureAdminOnly();
     $packages = Package::where('status',1)
@@ -212,9 +214,7 @@ if ($request->hasFile('foto_ktp')) {
 
     $odps = Odp::orderBy('nama')
         ->get();
-$marketings = Marketing::with('user')
-    ->get()
-    ->sortBy(fn ($marketing) => $marketing->user->name ?? '');
+$marketings = $this->marketingUsersForForm($request);
     return view(
         'registrations.edit',
         compact(
@@ -240,6 +240,10 @@ $marketings = Marketing::with('user')
         'odp_id'     => 'required|exists:odps,id',
         'foto_ktp'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
+
+        $request->merge([
+            'marketing_id' => $this->resolveMarketingId($request),
+        ]);
 
     $fotoKtp = $registration->foto_ktp;
 
@@ -431,5 +435,29 @@ public function verify(Registration $registration)
             403,
             'Hanya Admin yang dapat mengubah data atau status Registrasi.'
         );
+    }
+
+    private function resolveMarketingId(Request $request): int
+    {
+        if ($request->user()->hasRole('Marketing')) {
+            return (int) $request->user()->id;
+        }
+
+        return (int) $request->validate([
+            'marketing_id' => ['required', 'integer', 'exists:users,id'],
+        ])['marketing_id'];
+    }
+
+    private function marketingUsersForForm(Request $request)
+    {
+        if ($request->user()->hasRole('Marketing')) {
+            return \App\Models\User::query()
+                ->whereKey($request->user()->id)
+                ->get();
+        }
+
+        return \App\Models\User::role('Marketing')
+            ->orderBy('name')
+            ->get();
     }
 }

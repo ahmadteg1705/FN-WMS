@@ -138,7 +138,21 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Marketing</label>
+                    {{-- marketing-auto-current-user --}}
+@role('Marketing')
+    <label class="mb-1 block text-sm font-medium text-slate-700">Marketing</label>
+
+    <input type="hidden" name="marketing_id" value="{{ auth()->id() }}">
+
+    <div class="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2.5 text-slate-700">
+        {{ auth()->user()->name }}
+    </div>
+
+    <p class="mt-1 text-xs text-slate-500">
+        Otomatis menggunakan akun Marketing yang sedang login.
+    </p>
+@else
+<label class="block text-sm font-semibold text-slate-700 mb-2">Marketing</label>
 
                 <select
                     name="marketing_id"
@@ -153,6 +167,7 @@
                         </option>
                     @endforeach
                 </select>
+@endrole
                 </div>
                 <div id="odpInfo"
      class="hidden mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
