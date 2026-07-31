@@ -174,6 +174,14 @@ Route::post(
     Route::post('/packages/import', [PackageController::class, 'import'])
     ->name('packages.import');
     Route::resource('packages', PackageController::class);
+            Route::get('/customers/generate-number', [CustomerController::class, 'generateNumber'])
+        ->name('customers.generate-number');
+    Route::post('/customers/import', [CustomerController::class, 'import'])
+        ->name('customers.import');
+    Route::get('/customers/export', [CustomerController::class, 'export'])
+        ->name('customers.export');
+    Route::get('/customers/template', [CustomerController::class, 'downloadTemplate'])
+        ->name('customers.template');
     Route::resource('customers', CustomerController::class);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

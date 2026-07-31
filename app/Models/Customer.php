@@ -28,4 +28,10 @@ class Customer extends Model
         'foto_rumah',
         'catatan',
     ];
+
+    protected $casts = [
+        'tanggal_registrasi' => 'date',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
+    ];
 }
