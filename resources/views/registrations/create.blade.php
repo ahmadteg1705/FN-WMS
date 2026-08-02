@@ -142,7 +142,13 @@
 @role('Marketing')
     <label class="mb-1 block text-sm font-medium text-slate-700">Marketing</label>
 
-    <input type="hidden" name="marketing_id" value="{{ auth()->id() }}">
+    @if(auth()->user()->marketing)
+    <input type="hidden" name="marketing_id" value="{{ auth()->user()->marketing->id }}">
+@else
+    <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+        Akun belum terhubung ke data Marketing. Hubungi Admin.
+    </div>
+@endif
 
     <div class="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2.5 text-slate-700">
         {{ auth()->user()->name }}

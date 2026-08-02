@@ -120,6 +120,9 @@ $marketings = $this->marketingUsersForForm($request);
      */
     public function store(Request $request)
 {
+        $request->merge([
+            'marketing_id' => $this->resolveMarketingId($request),
+        ]);
     $request->validate([
         'nama'       => 'required|max:255',
         'telepon'    => 'required|max:20',
@@ -231,6 +234,9 @@ $marketings = $this->marketingUsersForForm($request);
      */
     public function update(Request $request, Registration $registration)
 {
+        $request->merge([
+            'marketing_id' => $this->resolveMarketingId($request),
+        ]);
         $this->ensureAdminOnly();
     $request->validate([
         'nama'       => 'required|max:255',
@@ -431,33 +437,47 @@ public function verify(Registration $registration)
                     'Super User',
                     'Super Admin',
                     'Admin',
+                    'Administrator',
                 ]),
             403,
             'Hanya Admin yang dapat mengubah data atau status Registrasi.'
         );
     }
-
     private function resolveMarketingId(Request $request): int
     {
         if ($request->user()->hasRole('Marketing')) {
-            return (int) $request->user()->id;
+            $marketingId = $request->user()->marketing?->id;
+
+            abort_unless(
+                $marketingId,
+                422,
+                'Akun Marketing ini belum terhubung dengan data Marketing. Hubungi Admin.'
+            );
+
+            return (int) $marketingId;
         }
 
         return (int) $request->validate([
-            'marketing_id' => ['required', 'integer', 'exists:users,id'],
+            'marketing_id' => [
+                'required',
+                'integer',
+                'exists:marketings,id',
+            ],
         ])['marketing_id'];
     }
-
     private function marketingUsersForForm(Request $request)
     {
         if ($request->user()->hasRole('Marketing')) {
-            return \App\Models\User::query()
-                ->whereKey($request->user()->id)
+            return \App\Models\Marketing::query()
+                ->with('user')
+                ->where('user_id', $request->user()->id)
                 ->get();
         }
 
-        return \App\Models\User::role('Marketing')
-            ->orderBy('name')
-            ->get();
+        return \App\Models\Marketing::query()
+            ->with('user')
+            ->get()
+            ->sortBy(fn ($marketing) => $marketing->user->name ?? '');
     }
+
 }

@@ -16,7 +16,7 @@
                 ← Kembali
             </a>
             {{-- registrations-admin-header-actions --}}
-@role('Super User|Super Admin|Admin')
+@role('Super User|Super Admin|Admin|Administrator')
     ${status}
     ${edit}
 @endrole
@@ -257,8 +257,46 @@
             </div>
 
             {{-- registrations-admin-action-card --}}
-@role('Super User|Super Admin|Admin')
-${card}
+@role('Super User|Super Admin|Admin|Administrator')
+{{-- Action Registrasi: hanya Admin --}}
+@role('Super User|Super Admin|Admin|Administrator')
+<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+    @if($registration->status == 'Registrasi Baru')
+        <form
+            action="{{ route('registrations.verify', $registration) }}"
+            method="POST"
+        >
+            @csrf
+            <button
+                type="submit"
+                onclick="return confirm('Verifikasi registrasi ini?')"
+                class="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+                ✓ Verifikasi
+            </button>
+        </form>
+
+    @elseif($registration->status == 'Diverifikasi')
+        @if(!$registration->workOrder)
+            <a
+                href="{{ route('work-orders.create', ['registration' => $registration->id]) }}"
+                class="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700"
+            >
+                📅 Jadwalkan Teknisi
+            </a>
+        @else
+            <a
+                href="{{ route('work-orders.show', $registration->workOrder) }}"
+                class="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-700"
+            >
+                👷 Lihat Work Order
+            </a>
+        @endif
+    @endif
+
+</div>
+@endrole
 @endrole</div>
 
     </div>
